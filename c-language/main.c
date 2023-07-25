@@ -17,9 +17,10 @@
 #define FILE4_NAME "./out2"
 #define FILE1_SIZE (1024 * 1024 * 1024 * 160L) // 160G
 #define FILE2_SIZE (1024 * 1024 * 100)         // 100M
-#define NUM_ITERATIONS 41943040                // 总的循环次数
-#define NUM_READS_FILE1 10                     // 读取多次file1后再读取一次file2
-#define NUM_STATISTICS_INTERVAL 10000          // 10000次统计一下均值
+// #define NUM_ITERATIONS 4194304                // file2总的循环次数, file1的总循环次数为
+#define NUM_ITERATIONS 419444         // file2总的循环次数, file1的总循环次数为100*419444
+#define NUM_READS_FILE1 100           // 读取多次file1后再读取一次file2
+#define NUM_STATISTICS_INTERVAL 10000 // 10000次统计一下均值
 #define PAGE_SIZE (4 * 1024)
 
 static inline uint64_t rdtsc()
@@ -78,9 +79,8 @@ double cycles_to_ns(uint64_t cycles)
 
 void print_times(double t1, double t2, int n, int fd)
 {
-    printf("File %d, average time of 1000 times: %.2f\n", n, t1);
-    printf("File %d, min time of 1000 times: %.2f\n", n, t2);
-
+    // printf("File %d, average time of 1000 times: %.2f\n", n, t1);
+    // printf("File %d, min time of 1000 times: %.2f\n", n, t2);
     char buf[40];
     int len = sprintf(buf, "%.2f, %.2f\n", t1, t2);
     write(fd, buf, len);
@@ -184,7 +184,7 @@ int main()
         for (j = 0; j < NUM_READS_FILE1; j++)
         {
             // offset1 = rand() % FILE1_SIZE;
-            offset1 = (offset1 + PAGE_SIZE - 1) % FILE1_SIZE;
+            offset1 = (offset1 + PAGE_SIZE) % FILE1_SIZE;
             rdtscp(&aux, &start);
             char c = *(addr1 + offset1);
             rdtscp(&aux, &end);
@@ -208,7 +208,7 @@ int main()
 
         // 随机读取第二个文件中的某个位置的内容
         // offset = rand() % FILE2_SIZE;
-        offset2 = (offset2 + PAGE_SIZE - 1) % FILE2_SIZE;
+        offset2 = (offset2 + PAGE_SIZE) % FILE2_SIZE;
         rdtscp(&aux, &start);
         char c = *(addr2 + offset2);
         rdtscp(&aux, &end);
