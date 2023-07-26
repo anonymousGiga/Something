@@ -74,7 +74,7 @@ double get_cpu_frequency()
 double cycles_to_ns(uint64_t cycles)
 {
     double frequency = get_cpu_frequency();
-    return cycles / frequency * 1e9;
+    return cycles * 1e9 / frequency;
 }
 
 void print_times(double t1, double t2, int n, int fd)
